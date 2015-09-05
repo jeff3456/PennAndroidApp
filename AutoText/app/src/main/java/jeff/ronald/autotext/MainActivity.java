@@ -25,8 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver sendBroadcastReceiver;
     private BroadcastReceiver deliveryBroadcastReceiver;
 
-    String SENT = "SMS_SENT";
-    String DELIVERED = "SMS_DELIVERED";
+    static String SENT = "SMS_SENT";
+    static String DELIVERED = "SMS_DELIVERED";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
                 String phoneNo = mRecipientNumber.getText().toString();
                 String message = mMessageEditText.getText().toString();
                 if (phoneNo.length() > 0 && message.length() > 0)
-                    sendSMS(phoneNo, message);
+                    sendSMS(phoneNo, message, getApplicationContext());
                 else
                     Toast.makeText(getBaseContext(),
                             "Please enter both phone number and message.",
@@ -105,14 +105,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void sendSMS(String phoneNumber, String message)
+    public static void sendSMS(String phoneNumber, String message, Context context)
     {
-
-        PendingIntent sentPI = PendingIntent.getBroadcast(this, 0,
+        PendingIntent sentPI = PendingIntent.getBroadcast(context, 0,
                 new Intent(SENT), 0);
 
-        PendingIntent deliveredPI = PendingIntent.getBroadcast(this, 0,
+        PendingIntent deliveredPI = PendingIntent.getBroadcast(context, 0,
                 new Intent(DELIVERED), 0);
+
 
 
         SmsManager sms = SmsManager.getDefault();
@@ -139,5 +139,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStop()
+    {
+
+        unregisterReceiver(sendBroadcastReceiver);
+        unregisterReceiver(deliveryBroadcastReceiver);
+        super.onStop();
     }
 }
