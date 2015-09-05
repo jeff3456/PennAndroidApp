@@ -28,7 +28,6 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
     private GoogleApiClient mGoogleApiClient;
     private String mLastLocation;
     protected LocationManager mLocationManager;
-    private boolean mSendLocation = false;
     private String mReturnNumber;
     private Context mContext;
 
@@ -39,6 +38,8 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
 
     public void sendReaction(String receivedMessage, String returnNumber ,Context context) {
         String defaultReactionMessage = "Hey this is AutoText";
+        String freePresentlyMessage = "I am doing nothing";
+        String busyMessage = "I am busy with ";
 
         mContext = context;
         mReturnNumber = returnNumber;
@@ -50,12 +51,30 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
         onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
 
         String locationRegexPat = ".*whe{0,1}re*.*a*re*.*y{0,1}o*u*.*";
+        String locationRegexPat1 = ".*whe{0,1}re*.*y{0,1}o*u{1,100}.*at.*";
         String presentActivityRegexPat = ".*wh*a*t.*a{0,1}re*.*y{0,1}o*u.*do*i*ng*.*";
+        String presentActivityRegexPat1 = ".*what'*s.*up.*";
 
-        if(receivedMessage.toLowerCase().matches(locationRegexPat) && mLastLocation != null) {
+        String lowercaseReceived = receivedMessage.toLowerCase();
+
+        if( (lowercaseReceived.matches(locationRegexPat) ||
+                lowercaseReceived.matches(locationRegexPat1) )
+                && mLastLocation != null) {
             Application.sendSMS(mReturnNumber, mLastLocation, mContext);
-        }else if (receivedMessage.toLowerCase().matches(presentActivityRegexPat)){
+
+        }else if (lowercaseReceived.matches(presentActivityRegexPat) ||
+                lowercaseReceived.matches(presentActivityRegexPat1)){
+
             CalendarRetriever cal = new CalendarRetriever(mContext);
+            String eventTitle = cal.findPresentEventTitle();
+            cal.close();
+
+            // if eventTitle is null then we assume that we are free.
+            if(eventTitle == null) {
+                Application.sendSMS(mReturnNumber, freePresentlyMessage, mContext);
+            } else {
+                Application.sendSMS(mReturnNumber, busyMessage + eventTitle, mContext);
+            }
 
         } else {
 //            Log.v(TAG, defaultReactionMessage);

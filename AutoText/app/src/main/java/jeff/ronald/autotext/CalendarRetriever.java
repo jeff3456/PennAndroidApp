@@ -1,16 +1,19 @@
 package jeff.ronald.autotext;
 
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.provider.CalendarContract;
+import android.util.Log;
+
+import java.util.Calendar;
 
 /**
  * This class will process the Calendar UI and return appropriate information.
  */
 public class CalendarRetriever {
+
+    private final String TAG = getClass().getSimpleName();
 
     private Cursor mEventCursor;
 
@@ -28,30 +31,54 @@ public class CalendarRetriever {
         ContentResolver resolver = context.getContentResolver();
 
         mCurrentTime = System.currentTimeMillis();
-        long oneDay = 86400000L;//== 24 * 60 * 60 * 1000;
+        long oneDayMillis = 86400000L;//== 24 * 60 * 60 * 1000;
 
-        Uri.Builder eventsUriBuilder = CalendarContract.Instances.CONTENT_URI.buildUpon();
-        ContentUris.appendId(eventsUriBuilder, mCurrentTime);
-        ContentUris.appendId(eventsUriBuilder, mCurrentTime + oneDay );
-
-        Uri eventUri = eventsUriBuilder.build();
-
-        String selection = "";
-        String[] selectionArgs = new String[]{""};
-
-        mEventCursor = resolver.query(eventUri,
+        mEventCursor = CalendarContract.Instances.query(
+                resolver,
                 EVENT_PROJECTION,
-                selection,
-                selectionArgs,
-                CalendarContract.Instances.BEGIN + " ASC");
+                mCurrentTime,
+                mCurrentTime + oneDayMillis);
 
     }
 
-    public String findPresentEvent(){
-        String eventTitle;
+    public String findPresentEventTitle(){
+
+        // Used to index the projections
+        final int TITLE_IND = 0;
+        final int LOCATION_IND = 1;
+        final int BEGINTIME_IND = 2;
+        final int ENDTIME_IND = 3;
+        final int ALL_DAY_IND = 4;
+
+        // Iterate through all cursors
+        if(mEventCursor != null) {
+            while (mEventCursor.moveToNext()) {
+
+                String title = mEventCursor.getString(TITLE_IND);
+
+                // Found an all day event so you are busy
+                if(mEventCursor.getInt(ALL_DAY_IND)>0) {
+                    return title + " all day";
+                }
 
 
+                Log.e(TAG, "Time of event:"+ mEventCursor.getLong(ENDTIME_IND));
+                // Calculate if the event happens during present
+                long duration = mEventCursor.getLong(ENDTIME_IND)-mEventCursor.getLong(BEGINTIME_IND);
+                long endMinusCurrent = mEventCursor.getLong(ENDTIME_IND) - mCurrentTime;
 
+                // Event is happening NOW
+                if(duration <= endMinusCurrent) {
+
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTimeInMillis(mEventCursor.getLong(ENDTIME_IND));
+
+                    return title + " until " + cal.get(Calendar.HOUR)+":"+ cal.get(Calendar.MINUTE);
+                }
+            }
+        }
+
+        // Processed all events so you are free
         return null;
     }
 
