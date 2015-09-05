@@ -35,13 +35,6 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
     public AutoReactionMessenger(Context context) {
         this.mContext = context;
 
-        // Connect to
-//        GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(context)
-//                .addApi(LocationServices.API)
-//                .addConnectionCallbacks(this)
-//                .addOnConnectionFailedListener(this)
-//                .build();
-//        mGoogleApiClient.connect();
     }
 
     public void sendReaction(String receivedMessage, String returnNumber ,Context context) {
@@ -56,10 +49,14 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
         mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 10, this);
         onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
 
-        String regexPattern = ".*whe{0,1}re{0,1}.*a{0,1}re{0,1}.*y{0,1}o{0,1}u.*";
+        String locationRegexPat = ".*whe{0,1}re*.*a*re*.*y{0,1}o*u*.*";
+        String presentActivityRegexPat = ".*wh*a*t.*a{0,1}re*.*y{0,1}o*u.*do*i*ng*.*";
 
-        if(receivedMessage.toLowerCase().matches(regexPattern) && mLastLocation != null) {
+        if(receivedMessage.toLowerCase().matches(locationRegexPat) && mLastLocation != null) {
             Application.sendSMS(mReturnNumber, mLastLocation, mContext);
+        }else if (receivedMessage.toLowerCase().matches(presentActivityRegexPat)){
+            CalendarRetriever cal = new CalendarRetriever(mContext);
+
         } else {
 //            Log.v(TAG, defaultReactionMessage);
 //            Application.sendSMS(mReturnNumber, defaultReactionMessage, context);
