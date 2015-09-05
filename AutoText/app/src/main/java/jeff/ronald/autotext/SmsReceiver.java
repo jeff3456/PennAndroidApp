@@ -5,12 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.gsm.SmsMessage;
+import android.util.Log;
 
 /**
  * Created by jeff on 9/5/15.
  */
 public class SmsReceiver extends BroadcastReceiver {
     AutoReactionMessenger mReactionMessenger;
+
+    private final String TAG = getClass().getSimpleName();
 
     @Override
     public void onReceive(Context context, Intent intent)
@@ -29,7 +32,7 @@ public class SmsReceiver extends BroadcastReceiver {
             msgs = new SmsMessage[pdus.length];
 
             for (int i=0; i<msgs.length; i++){
-                msgs[i] = SmsMessage.createFromPdu((byte[])pdus[i]);
+                msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
                 // Received the return number
                 returnNumber = msgs[i].getOriginatingAddress().toString();
                 receivedMessage = msgs[i].getMessageBody().toString();
@@ -40,13 +43,12 @@ public class SmsReceiver extends BroadcastReceiver {
 
             mReactionMessenger = new AutoReactionMessenger(context);
 
+            Log.e(TAG, receivedMessage);
             // Generate the message to send
-            String reactionMessage = mReactionMessenger.generateReaction(receivedMessage);
+            mReactionMessenger.sendReaction(receivedMessage,
+                                                        returnNumber,
+                                                        context);
 
-            // Send text based on reactionMessage
-            MainActivity.sendSMS(returnNumber, reactionMessage, context);
-
-            mReactionMessenger.disconnect();
         }
     }
 

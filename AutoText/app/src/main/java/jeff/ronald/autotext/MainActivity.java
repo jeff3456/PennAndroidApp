@@ -1,7 +1,6 @@
 package jeff.ronald.autotext;
 
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,18 +24,18 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver sendBroadcastReceiver;
     private BroadcastReceiver deliveryBroadcastReceiver;
 
-    static String SENT = "SMS_SENT";
-    static String DELIVERED = "SMS_DELIVERED";
+    private boolean mBroadcastRegistered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mSendTextButton     = (Button) findViewById(R.id.sendTextButton);
-        mRecipientNumber    = (EditText) findViewById(R.id.recipientNumber);
-        mMessageEditText    = (EditText) findViewById(R.id.messageText);
+        mSendTextButton = (Button) findViewById(R.id.sendTextButton);
+        mRecipientNumber = (EditText) findViewById(R.id.recipientNumber);
+        mMessageEditText = (EditText) findViewById(R.id.messageText);
 
+        mBroadcastRegistered = false;
 
         mSendTextButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -44,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
                 String phoneNo = mRecipientNumber.getText().toString();
                 String message = mMessageEditText.getText().toString();
                 if (phoneNo.length() > 0 && message.length() > 0)
-                    sendSMS(phoneNo, message, getApplicationContext());
+                    Application.sendSMS(phoneNo, message, getApplicationContext());
                 else
                     Toast.makeText(getBaseContext(),
                             "Please enter both phone number and message.",
@@ -54,11 +53,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //---when the SMS has been sent---
-        sendBroadcastReceiver = new BroadcastReceiver(){
+        sendBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context arg0, Intent arg1) {
-                switch (getResultCode())
-                {
+                switch (getResultCode()) {
                     case Activity.RESULT_OK:
                         Toast.makeText(getBaseContext(), "SMS sent",
                                 Toast.LENGTH_SHORT).show();
@@ -99,25 +97,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-
-        registerReceiver(deliveryBroadcastReceiver, new IntentFilter(DELIVERED));
-        registerReceiver(sendBroadcastReceiver, new IntentFilter(SENT));
+        if (!mBroadcastRegistered) {
+            registerReceiver(deliveryBroadcastReceiver, new IntentFilter(Application.DELIVERED));
+            registerReceiver(sendBroadcastReceiver, new IntentFilter(Application.SENT));
+        }
 
     }
 
-    public static void sendSMS(String phoneNumber, String message, Context context)
-    {
-        PendingIntent sentPI = PendingIntent.getBroadcast(context, 0,
-                new Intent(SENT), 0);
-
-        PendingIntent deliveredPI = PendingIntent.getBroadcast(context, 0,
-                new Intent(DELIVERED), 0);
-
-
-
-        SmsManager sms = SmsManager.getDefault();
-        sms.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -144,9 +130,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop()
     {
-
-        unregisterReceiver(sendBroadcastReceiver);
-        unregisterReceiver(deliveryBroadcastReceiver);
+        if(mBroadcastRegistered) {
+            unregisterReceiver(sendBroadcastReceiver);
+            unregisterReceiver(deliveryBroadcastReceiver);
+        }
         super.onStop();
     }
 }
