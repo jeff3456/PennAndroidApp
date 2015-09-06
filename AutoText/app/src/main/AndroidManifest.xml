@@ -35,6 +35,11 @@
             android:enabled="true"
             android:exported="true" >
         </provider>
+
+        <activity
+            android:name=".AddAutomaticResponse"
+            android:label="@string/title_activity_add_automatic_response" >
+        </activity>
     </application>
 
 </manifest>

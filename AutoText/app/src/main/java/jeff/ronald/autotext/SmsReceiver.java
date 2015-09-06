@@ -35,7 +35,7 @@ public class SmsReceiver extends BroadcastReceiver {
                 msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
                 // Received the return number
                 returnNumber = msgs[i].getOriginatingAddress().toString();
-                receivedMessage = msgs[i].getMessageBody().toString();
+                receivedMessage += msgs[i].getMessageBody().toString();
             }
 
             //---display the new SMS message---
@@ -45,9 +45,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
             Log.e(TAG, receivedMessage);
             // Generate the message to send
-            mReactionMessenger.sendReaction(receivedMessage,
-                                                        returnNumber,
-                                                        context);
+            mReactionMessenger.sendReaction(receivedMessage, returnNumber, context);
 
         }
     }

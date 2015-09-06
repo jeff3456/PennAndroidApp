@@ -60,7 +60,7 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
         onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
 
         String lowercaseReceived = receivedMessage.toLowerCase();
-        String noSpacesReceived = lowercaseReceived.replaceAll("\\s+","");
+        String noSpacesReceived = lowercaseReceived.replaceAll("\\s+", "");
 
 
         // Check what kind of message is sent.
@@ -86,13 +86,13 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
             }
 
         } else if (noSpacesReceived.substring(0,9).equals("calculate")) {
-            double answer = Double.NaN;
+            double answer = Double.MAX_VALUE;
             try {
                 answer = Application.eval(noSpacesReceived.substring(9));
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            if(answer != Double.NaN) {
+            if(answer != Double.MAX_VALUE) {
                 Application.sendSMS(mReturnNumber, "The answer is: " + answer
                         + "\n " + smilesAndHearts, mContext);
             } else {
@@ -104,8 +104,8 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
     }
 
     private String generateSmilesAndHearts(String message) {
-        String smile = ":)";
-        String heart = "<3";
+        String smile = ":) ";
+        String heart = "<3 ";
         int smileyCount = 0;
         int heartCount = 0;
 
@@ -115,7 +115,7 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
         for(int i = 0; i < message.length() - 1; i ++) {
 
             if ((message.charAt(i) == ':' && message.charAt(i + 1) == ')') ||
-                    (message.charAt(i) == '(' && message.charAt(i + 1) == ')')) {
+                    (message.charAt(i) == '(' && message.charAt(i + 1) == ':')) {
                 smileyCount++;
             }
         }
