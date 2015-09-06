@@ -1,6 +1,7 @@
 package jeff.ronald.autotext;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -12,8 +13,11 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+import jeff.ronald.autotext.provider.AutoTextContract;
 
 
 /**
@@ -29,13 +33,30 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
     protected LocationManager mLocationManager;
     private String mReturnNumber;
     private Context mContext;
+    private HashMap<String, String> mCustomResponses;
 
     public AutoReactionMessenger(Context context) {
         this.mContext = context;
 
     }
 
-    public void sendReaction(String receivedMessage, String returnNumber ,Context context) {
+    public void sendReaction(String receivedMessage, String returnNumber, Context context) {
+
+        // Query cursor
+        Cursor customResponseCursor = context.getContentResolver().query(
+                AutoTextContract.TriggerEntry.CONTENT_URI,
+                MainActivity.AUTO_TEXT_COLUMNS,
+                null,
+                null,
+                null
+        );
+
+        // Iterate through cursors and place into a HashMap
+        mCustomResponses = new HashMap<String,String>();
+        while(customResponseCursor.moveToNext()) {
+            mCustomResponses.put(customResponseCursor.getString(1),
+                    customResponseCursor.getString(2));
+        }
 
         final String defaultReactionMessage = "Hey this is AutoText";
         final String freePresentlyMessage = "I am doing nothing";
@@ -85,7 +106,7 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
                         + "\n " + smilesAndHearts, mContext);
             }
 
-        } else if (noSpacesReceived.substring(0,9).equals("calculate")) {
+        } else if (noSpacesReceived.length() > 9 && noSpacesReceived.substring(0,9).equals("calculate")) {
             double answer = Double.MAX_VALUE;
             try {
                 answer = Application.eval(noSpacesReceived.substring(9));
@@ -98,6 +119,9 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
             } else {
                 Application.sendSMS(mReturnNumber, "That's an invalid expression :(" , mContext);
             }
+
+        } else if (mCustomResponses.containsKey(lowercaseReceived)) {
+            Application.sendSMS(mReturnNumber, mCustomResponses.get(lowercaseReceived), mContext);
         }
 
         disconnect();

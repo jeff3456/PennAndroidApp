@@ -24,9 +24,7 @@ public class AutoTextContract {
 
         public static final String TABLE_NAME = "triggers";
 
-
         // Columns for TriggerEntry
-
         public static final String COLUMN_RECIEVE_TEXT = "title";
 
         public static final String COLUMN_REACT_TEXT = "likes";

@@ -5,30 +5,96 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBarActivity;
 import android.telephony.gsm.SmsManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.EditText;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import jeff.ronald.autotext.provider.AutoTextContract;
 
-    Button mSendTextButton;
-    EditText mRecipientNumber;
-    EditText mMessageEditText;
+public class MainActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+
+    private final String TAG = getClass().getSimpleName();
+
+    private final int AUTOTEXT_LOADER = 0;
+
+    ListView mListView;
+    AutoTextAdapter mAutoTextAdapter;
+
+    Context mContext;
 
     private BroadcastReceiver sendBroadcastReceiver;
     private BroadcastReceiver deliveryBroadcastReceiver;
 
     private boolean mBroadcastRegistered;
 
+    public static final String[] AUTO_TEXT_COLUMNS = {
+        AutoTextContract.TriggerEntry.TABLE_NAME + "." + AutoTextContract.TriggerEntry._ID,
+        AutoTextContract.TriggerEntry.COLUMN_RECIEVE_TEXT,
+        AutoTextContract.TriggerEntry.COLUMN_REACT_TEXT
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_main);
+        setContentView(R.layout.activity_main);
+
+        Log.e(TAG, "created Main Fragment");
+
+        // Inflate the layout for this fragment
+        View addButton = findViewById(R.id.add_button);
+
+        mListView = (ListView) findViewById(R.id.listview_main);
+
+        // Create forecast adapter and find listview
+        mAutoTextAdapter = new AutoTextAdapter(this, null, 0);
+        mListView = (ListView) findViewById(R.id.listview_main);
+        mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+
+
+        // If you click on item, you can delete it
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                TextView v = (TextView) view.findViewById(R.id.receive_textview);
+                String receive = v.getText().toString();
+
+                v = (TextView) view.findViewById(R.id.response_textview);
+                String response = v.getText().toString();
+
+                Intent intent = new Intent(mContext, EditResponseActivity.class);
+                intent.putExtra("receive", receive);
+                intent.putExtra("response", response);
+                startActivity(intent);
+            }
+        });
+
+
+        mContext = this;
+
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Perform adding a new automatic expression
+                Log.e(TAG, "Click add button registered");
+                Intent i = new Intent(mContext, AddAutomaticResponse.class);
+                startActivity(i);
+
+            }
+        });
 
         mBroadcastRegistered = false;
 
@@ -81,6 +147,10 @@ public class MainActivity extends AppCompatActivity {
             registerReceiver(deliveryBroadcastReceiver, new IntentFilter(Application.DELIVERED));
             registerReceiver(sendBroadcastReceiver, new IntentFilter(Application.SENT));
         }
+
+        getSupportLoaderManager().initLoader(AUTOTEXT_LOADER, null, this);
+
+        mListView.setAdapter(mAutoTextAdapter);
     }
 
 
@@ -117,5 +187,30 @@ public class MainActivity extends AppCompatActivity {
             unregisterReceiver(deliveryBroadcastReceiver);
         }
         super.onStop();
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+
+        Uri autoTextUri = AutoTextContract.TriggerEntry.CONTENT_URI;
+
+        return new CursorLoader(this,
+                autoTextUri,
+                AUTO_TEXT_COLUMNS,
+                null,
+                null,
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mAutoTextAdapter.swapCursor(data);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAutoTextAdapter.swapCursor(null);
+
     }
 }

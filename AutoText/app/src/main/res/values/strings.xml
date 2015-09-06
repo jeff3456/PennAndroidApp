@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AutoText</string>
+    <string name="app_name">Response Bot</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -9,4 +9,5 @@
     <!-- -->
     <string name="show_subtitle">Create Automated Text</string>
     <string name="title_activity_add_automatic_response">AddAutomaticResponse</string>
+    <string name="title_activity_edit_response">EditResponseActivity</string>
 </resources>

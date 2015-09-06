@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +15,8 @@ import android.widget.Toast;
 import jeff.ronald.autotext.provider.AutoTextContract;
 
 public class AddAutomaticResponse extends AppCompatActivity {
+
+    private final String TAG = getClass().getSimpleName();
 
     EditText mTriggerEditText;
     EditText mResponseEditText;
@@ -49,11 +52,17 @@ public class AddAutomaticResponse extends AppCompatActivity {
                 Uri newAutoTextUri;
                 ContentValues mAutoTextValues = new ContentValues();
 
-                mAutoTextValues.put(AutoTextContract.TriggerEntry.COLUMN_RECIEVE_TEXT, trigger);
+                mAutoTextValues.put(AutoTextContract.TriggerEntry.COLUMN_RECIEVE_TEXT, trigger.toLowerCase());
                 mAutoTextValues.put(AutoTextContract.TriggerEntry.COLUMN_REACT_TEXT, response);
-                
+
                 newAutoTextUri = getContentResolver().insert(
                         AutoTextContract.TriggerEntry.CONTENT_URI, mAutoTextValues);
+
+                Log.e(TAG, "Inserted element successfully!");
+
+                Toast.makeText(getApplicationContext(),"Successfuly inserted AutoText"
+                        ,Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
     }

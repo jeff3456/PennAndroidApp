@@ -31,14 +31,23 @@
 
         <provider
             android:name=".provider.AutoTextProvider"
-            android:authorities="jeff.ronald.autotext.provider"
+            android:authorities="jeff.ronald.autotext"
             android:enabled="true"
             android:exported="true" >
         </provider>
 
         <activity
             android:name=".AddAutomaticResponse"
-            android:label="@string/title_activity_add_automatic_response" >
+            android:label="@string/title_activity_add_automatic_response"
+            android:parentActivityName=".MainActivity" >
+        </activity>
+        <activity
+            android:name=".EditResponseActivity"
+            android:label="@string/title_activity_edit_response"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="jeff.ronald.autotext.MainActivity" />
         </activity>
     </application>
 

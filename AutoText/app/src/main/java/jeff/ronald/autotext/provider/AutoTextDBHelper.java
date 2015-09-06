@@ -23,7 +23,7 @@ public class AutoTextDBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         // Create a table to hold locations.  A location consists of the string supplied in the
         // location setting, the city name, and the latitude and longitude
-        final String SQL_CREATE_LOCATION_TABLE = "CREATE TABLE " + TriggerEntry.TABLE_NAME + " (" +
+        final String SQL_CREATE_AUTOTEXT_TABLE = "CREATE TABLE " + TriggerEntry.TABLE_NAME + " (" +
                 TriggerEntry._ID + " INTEGER PRIMARY KEY," +
                 TriggerEntry.COLUMN_RECIEVE_TEXT + " TEXT NOT NULL, " +
                 TriggerEntry.COLUMN_REACT_TEXT + " TEXT NOT NULL " +
@@ -62,11 +62,10 @@ public class AutoTextDBHelper extends SQLiteOpenHelper {
                 // To assure the application have just one weather entry per day
                 // per location, it's created a UNIQUE constraint with REPLACE strategy
                 " UNIQUE (" + WeatherEntry.COLUMN_DATE + ", " +
-                WeatherEntry.COLUMN_LOC_KEY + ") ON CONFLICT REPLACE);";
+                WeatherEntry.COLUMN_LOC_KEY + ") ON CONFLICT REPLACE);";*/
 
-        sqLiteDatabase.execSQL(SQL_CREATE_LOCATION_TABLE);
-        sqLiteDatabase.execSQL(SQL_CREATE_WEATHER_TABLE);
-        */
+        sqLiteDatabase.execSQL(SQL_CREATE_AUTOTEXT_TABLE);
+
     }
 
     @Override

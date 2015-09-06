@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
 public class AutoTextProvider extends ContentProvider {
+    private final String TAG = getClass().getSimpleName();
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private AutoTextDBHelper mOpenHelper;
@@ -19,7 +20,6 @@ public class AutoTextProvider extends ContentProvider {
 
     static {
         sAutoTextQueryBuilder = new SQLiteQueryBuilder();
-
     }
 
     private static final String sTriggerSelection =

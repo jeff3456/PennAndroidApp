@@ -1,14 +1,13 @@
 package jeff.ronald.autotext;
 
-import android.annotation.TargetApi;
 import android.app.Fragment;
-import android.graphics.Outline;
-import android.os.Build;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
 
 /**
  * A fragment representing a list of Items.
@@ -19,34 +18,32 @@ import android.view.ViewOutlineProvider;
  * interface.
  */
 public class MainFragment extends Fragment {
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+
+    private Context mContext;
+
+    private final String TAG = getClass().getSimpleName();
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent,
                              Bundle savedInstanceState) {
+
+        Log.e(TAG, "created Main Fragment");
+
         // Inflate the layout for this fragment
         View v;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            v = inflater.inflate(R.layout.fragment_main, parent, false);
-        } else {
-            v = super.onCreateView(inflater, parent, savedInstanceState);
-        }
+        v = inflater.inflate(R.layout.fragment_main, parent, false);
 
         View addButton = v.findViewById(R.id.add_button);
 
-        addButton.setOutlineProvider(new ViewOutlineProvider() {
-
-            @Override
-            public void getOutline(View view, Outline outline) {
-                int diameter = getResources().getDimensionPixelSize(R.dimen.diameter);
-                outline.setOval(0, 0, diameter, diameter);
-            }
-        });
-        addButton.setClipToOutline(true);
+        mContext = getActivity();
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Perform adding a new automatic expression
+                Log.e(TAG, "Click add button registered");
+                Intent i = new Intent(mContext, AddAutomaticResponse.class);
+                startActivity(i);
 
             }
         });

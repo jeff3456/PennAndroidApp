@@ -22,10 +22,8 @@
         android:layout_marginRight="15dp"
 
         android:tint="@android:color/white"
-        android:background="@drawable/oval_ripple"
-        android:elevation="@dimen/elevation_low"
-        android:src="@android:drawable/ic_input_add"
-        android:stateListAnimator="@anim/button_elevation"/>
+        android:background="@drawable/oval"
+        android:src="@android:drawable/ic_input_add" />
 
 
 </FrameLayout>
