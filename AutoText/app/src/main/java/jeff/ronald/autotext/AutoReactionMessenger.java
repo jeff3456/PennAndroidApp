@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Locale;
 
 
-
 /**
  * This class will handle logic for sending appropriate reaction message
  */
@@ -41,7 +40,7 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
         final String defaultReactionMessage = "Hey this is AutoText";
         final String freePresentlyMessage = "I am doing nothing";
         final String busyMessage = "I am busy with ";
-        final String whatIsQueryPrefix = "What is";
+        final String calculate = "calculate ";
 
         String locationRegexPat = ".*whe{0,1}re*.*a*re*.*y{0,1}o*u*.*";
         String locationRegexPat1 = ".*whe{0,1}re*.*y{0,1}o*u{1,100}.*at.*";
@@ -61,9 +60,10 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
         onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
 
         String lowercaseReceived = receivedMessage.toLowerCase();
+        String noSpacesReceived = lowercaseReceived.replaceAll("\\s+","");
 
 
-
+        // Check what kind of message is sent.
         if( (lowercaseReceived.matches(locationRegexPat) ||
                 lowercaseReceived.matches(locationRegexPat1) )
                 && mLastLocation != null) {
@@ -85,9 +85,19 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
                         + "\n " + smilesAndHearts, mContext);
             }
 
-        } else {
-//            Log.v(TAG, defaultReactionMessage);
-//            Application.sendSMS(mReturnNumber, defaultReactionMessage, context);
+        } else if (noSpacesReceived.substring(0,9).equals("calculate")) {
+            double answer = Double.NaN;
+            try {
+                answer = Application.eval(noSpacesReceived.substring(9));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if(answer != Double.NaN) {
+                Application.sendSMS(mReturnNumber, "The answer is: " + answer
+                        + "\n " + smilesAndHearts, mContext);
+            } else {
+                Application.sendSMS(mReturnNumber, "That's an invalid expression :(" , mContext);
+            }
         }
 
         disconnect();
@@ -119,12 +129,16 @@ public class AutoReactionMessenger implements GoogleApiClient.ConnectionCallback
 
         while (smileyCount > 0 && heartCount > 0) {
             generatedString += smile + heart;
+            smileyCount--;
+            heartCount--;
         }
         while(smileyCount > 0) {
             generatedString += smile;
+            smileyCount--;
         }
         while(heartCount > 0) {
             generatedString += heart;
+            heartCount--;
         }
 
         return generatedString;
